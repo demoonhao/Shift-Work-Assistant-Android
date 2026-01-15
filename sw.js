@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wife-shift-clock-v5';
+const CACHE_NAME = 'wife-shift-clock-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -25,6 +25,8 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // 激活后立即获取控制权
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {

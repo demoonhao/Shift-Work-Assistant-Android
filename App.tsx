@@ -25,8 +25,7 @@ import {
   Info,
   X,
   AlertCircle,
-  RefreshCw,
-  LogOut
+  RefreshCw
 } from 'lucide-react';
 import { Shift, UserPreferences, DailyPlan, ViewType, SettingsSubView } from './types';
 import { DEFAULT_SHIFTS, DEFAULT_PREFS, INITIAL_WEEKLY_PLAN, WEEK_DAYS } from './constants';
@@ -80,7 +79,7 @@ const App: React.FC = () => {
         showToast('感谢安装！');
       }
     } else {
-      // 如果没有捕获到 prompt，可能是已经安装或浏览器不支持自动触发，显示引导
+      // 如果没有捕获到 prompt，可能是已经安装或浏览器不支持自动触发，直接显示引导
       setShowInstallGuide(true);
     }
   };
@@ -92,12 +91,14 @@ const App: React.FC = () => {
           registration.unregister();
         }
         localStorage.clear();
-        showToast('缓存已清理，正在重载...');
+        showToast('缓存清理中...');
         setTimeout(() => {
-          window.location.reload();
+          // Fix: window.location.reload() no longer accepts arguments in modern TypeScript/Web APIs
+          window.location.reload(); // 强制刷新页面
         }, 1000);
       });
     } else {
+      // Fix: window.location.reload() no longer accepts arguments in modern TypeScript/Web APIs
       window.location.reload();
     }
   };
@@ -378,7 +379,7 @@ const App: React.FC = () => {
             <div className="pt-4 border-t border-gray-100 mt-4 space-y-3">
               <button onClick={handleForceUpdate} className="w-full bg-gray-50 text-gray-500 rounded-[1.8rem] p-5 flex items-center justify-center space-x-3 active:scale-[0.98] transition-all">
                 <RefreshCw size={18} />
-                <span className="font-black text-sm">清理缓存并同步新版</span>
+                <span className="font-black text-sm">清理并刷新图标/缓存</span>
               </button>
             </div>
           </div>
@@ -536,7 +537,7 @@ const App: React.FC = () => {
                   <div className="px-8 pb-10 space-y-6 overflow-y-auto max-h-[70vh] no-scrollbar">
                       <div className="bg-rose-50 p-5 rounded-[1.5rem] flex items-start space-x-4 border border-rose-100">
                           <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={20} />
-                          <p className="text-[11px] font-bold text-rose-900 leading-relaxed italic">如果点击“安装”没反应，可能是手机系统限制。请尝试手动添加：</p>
+                          <p className="text-[11px] font-bold text-rose-900 leading-relaxed italic">如果点击“安装”没反应，通常是系统限制了快捷方式创建。请根据下方指南手动操作：</p>
                       </div>
                       
                       <div className="space-y-4">
@@ -546,7 +547,7 @@ const App: React.FC = () => {
                         <p className="text-[10px] text-gray-500 pl-4 leading-relaxed">
                           1. 点击浏览器右上角 <span className="text-gray-900 font-bold">“...”</span> 菜单。<br/>
                           2. 选择 <span className="text-blue-600 font-bold">“添加到主屏幕”</span> 或 <span className="text-blue-600 font-bold">“安装应用”</span>。<br/>
-                          3. 如果还是不行，请在“应用信息”中开启“桌面快捷方式”权限。
+                          3. 如果提示权限，请在手机“权限管理”中允许“桌面快捷方式”。
                         </p>
                       </div>
 
@@ -555,8 +556,8 @@ const App: React.FC = () => {
                             <div className="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-black">iOS/苹果</div>
                         </div>
                         <p className="text-[10px] text-gray-500 pl-4 leading-relaxed">
-                          1. 点击底部工具栏中间的 <span className="text-gray-900 font-bold">“分享”</span> 图标 (向上箭头)。<br/>
-                          2. 向上滑动找到 <span className="text-rose-600 font-bold">“添加到主屏幕”</span>。
+                          1. 点击 Safari 底部工具栏的 <span className="text-gray-900 font-bold">“分享”</span> 图标 (向上箭头)。<br/>
+                          2. 向上滑动找到并点击 <span className="text-rose-600 font-bold">“添加到主屏幕”</span>。
                         </p>
                       </div>
 
