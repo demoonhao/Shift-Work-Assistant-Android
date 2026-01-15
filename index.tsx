@@ -10,13 +10,13 @@ if (!rootElement) {
 // 注册 Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // 使用相对路径注册，确保在子目录下也能准确找到 sw.js
-    navigator.serviceWorker.register('sw.js', { scope: './' })
+    // 使用相对路径确保在子目录下正确加载
+    navigator.serviceWorker.register('./sw.js')
       .then(registration => {
-        console.log('SW registered: ', registration);
+        console.log('SW registered: ', registration.scope);
       })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
+      .catch(err => {
+        console.error('SW registration failed: ', err);
       });
   });
 }
