@@ -21,7 +21,10 @@ import {
   Share2,
   Users,
   Sparkles,
-  Download
+  Download,
+  Info,
+  X,
+  AlertCircle
 } from 'lucide-react';
 import { Shift, UserPreferences, DailyPlan, ViewType, SettingsSubView } from './types';
 import { DEFAULT_SHIFTS, DEFAULT_PREFS, INITIAL_WEEKLY_PLAN, WEEK_DAYS } from './constants';
@@ -51,8 +54,9 @@ const App: React.FC = () => {
     isOpen: boolean, type: 'shift' | 'cutoff', shiftId?: string, field?: 'startTime' | 'endTime', tempHour: string, tempMin?: string
   } | null>(null);
 
-  // PWA 安装引导状态
+  // PWA 相关
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
 
   // --- 监听安装事件 ---
   useEffect(() => {
@@ -61,23 +65,19 @@ const App: React.FC = () => {
       setDeferredPrompt(e);
     };
     window.addEventListener('beforeinstallprompt', handler);
-    
-    // 解析 URL 参数处理快捷方式跳转
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    if (tabParam === 'schedule') setActiveTab(ViewType.SCHEDULE);
-    if (tabParam === 'settings') setActiveTab(ViewType.SETTINGS);
-
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-      showToast('感谢安装！');
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        showToast('安装指令已发出');
+      }
+    } else {
+      setShowInstallGuide(true);
     }
   };
 
@@ -314,18 +314,23 @@ const App: React.FC = () => {
             <h1 className="text-4xl font-black text-gray-900 tracking-tighter">应用设置</h1>
           </div>
           <div className="space-y-3.5">
-            {deferredPrompt && (
-              <button onClick={handleInstallClick} className="w-full bg-blue-600 rounded-[1.8rem] p-5 flex items-center justify-between shadow-lg shadow-blue-200 active:scale-[0.98] transition-all text-white mb-2">
-                <div className="flex items-center space-x-5">
-                  <div className="w-12 h-12 rounded-[1.1rem] bg-white/20 flex items-center justify-center"><Download size={22} /></div>
-                  <div className="text-left">
-                    <span className="font-black text-base block leading-none">安装到手机</span>
-                    <span className="text-[10px] opacity-70 mt-1 block">像原生软件一样快速启动</span>
-                  </div>
-                </div>
-                <ChevronRight size={20} className="text-white/40" />
-              </button>
-            )}
+            <div className="bg-white rounded-[2rem] border border-blue-100 shadow-sm overflow-hidden mb-2">
+                <button onClick={handleInstallClick} className="w-full bg-blue-600 p-5 flex items-center justify-between active:scale-[0.98] transition-all text-white">
+                    <div className="flex items-center space-x-5">
+                    <div className="w-12 h-12 rounded-[1.1rem] bg-white/20 flex items-center justify-center"><Download size={22} /></div>
+                    <div className="text-left">
+                        <span className="font-black text-base block leading-none">安装到手机</span>
+                        <span className="text-[10px] opacity-70 mt-1 block">独立 App 体验，更快捷</span>
+                    </div>
+                    </div>
+                    <ChevronRight size={20} className="text-white/40" />
+                </button>
+                <button onClick={() => setShowInstallGuide(true)} className="w-full py-3 px-5 flex items-center justify-center space-x-2 text-blue-600 text-[10px] font-black bg-blue-50/50 border-t border-blue-50">
+                    <Info size={12} strokeWidth={3} />
+                    <span>小米/安卓安装遇到问题？查看指南</span>
+                </button>
+            </div>
+
             {[
               { view: SettingsSubView.SHIFTS, icon: Layers, label: '班次模板', bg: 'bg-rose-50', color: 'text-rose-500', border: 'border-rose-100' },
               { view: SettingsSubView.ALARM, icon: Timer, label: '起床用时', bg: 'bg-orange-50', color: 'text-orange-500', border: 'border-orange-100' },
@@ -481,6 +486,42 @@ const App: React.FC = () => {
     );
   };
 
+  const InstallGuideModal = () => {
+      if (!showInstallGuide) return null;
+      return (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center px-6">
+              <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={() => setShowInstallGuide(false)}></div>
+              <div className="relative bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300">
+                  <div className="p-8 pb-4 flex justify-between items-center">
+                      <h3 className="text-2xl font-black text-gray-900 tracking-tighter">小米/安卓安装指南</h3>
+                      <button onClick={() => setShowInstallGuide(false)} className="bg-gray-100 p-2 rounded-full text-gray-400"><X size={20} /></button>
+                  </div>
+                  <div className="px-8 pb-10 space-y-6 overflow-y-auto max-h-[70vh] no-scrollbar">
+                      <div className="bg-rose-50 p-5 rounded-[1.5rem] flex items-start space-x-4 border border-rose-100">
+                          <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={20} />
+                          <p className="text-[11px] font-bold text-rose-900 leading-relaxed italic">由于小米系统限制，浏览器默认没有创建图标权限，导致安装“失败”并跳转设置页。</p>
+                      </div>
+                      <div className="space-y-4">
+                          <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">1</div>
+                              <p className="text-sm font-black text-gray-900">打开权限</p>
+                          </div>
+                          <p className="text-[10px] text-gray-500 pl-9 leading-relaxed">在刚才跳转到的“应用信息”页面，点击 <span className="text-gray-900 font-bold underline">“权限管理”</span>，找到 <span className="text-gray-900 font-bold underline">“桌面快捷方式”</span> 并设置为 <span className="text-rose-600 font-bold">“始终允许”</span>。</p>
+                      </div>
+                      <div className="space-y-4">
+                          <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">2</div>
+                              <p className="text-sm font-black text-gray-900">手动添加</p>
+                          </div>
+                          <p className="text-[10px] text-gray-500 pl-9 leading-relaxed">如果依然无法自动创建，请点击浏览器右上角 <span className="text-gray-900 font-bold">“...”菜单</span>，选择 <span className="text-blue-600 font-bold">“添加到主屏幕”</span> 或 <span className="text-blue-600 font-bold">“安装应用”</span>。</p>
+                      </div>
+                      <button onClick={() => setShowInstallGuide(false)} className="w-full bg-gray-900 text-white py-5 rounded-[1.5rem] font-black text-sm active:scale-95 transition-all mt-4">我知道了</button>
+                  </div>
+              </div>
+          </div>
+      )
+  }
+
   return (
     <div className="h-[100dvh] w-screen bg-[#FDFDFE] flex flex-col max-w-md mx-auto overflow-hidden relative">
       {toast.visible && (<div className="fixed top-12 left-1/2 -translate-x-1/2 z-[200] bg-gray-900/95 backdrop-blur-xl text-white px-8 py-4 rounded-[2rem] text-sm font-black shadow-2xl animate-in fade-in slide-in-from-top-6 duration-500 flex items-center space-x-3 border border-white/10"><Check size={18} className="text-green-400" strokeWidth={4} /><span>{toast.message}</span></div>)}
@@ -499,6 +540,7 @@ const App: React.FC = () => {
         })}
       </div>
       <TimePickerOverlay />
+      <InstallGuideModal />
     </div>
   );
 };
