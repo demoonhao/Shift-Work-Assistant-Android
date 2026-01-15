@@ -1,11 +1,10 @@
-const CACHE_NAME = 'wife-shift-clock-v6';
+const CACHE_NAME = 'wife-shift-clock-v8';
 const ASSETS = [
   './',
   './index.html',
-  './index.tsx',
   './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://cdn-icons-png.flaticon.com/512/3652/3652191.png'
+  'https://cdn-icons-png.flaticon.com/512/2997/2997155.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -25,7 +24,6 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // 激活后立即获取控制权
   self.clients.claim();
 });
 

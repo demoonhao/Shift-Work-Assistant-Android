@@ -79,7 +79,6 @@ const App: React.FC = () => {
         showToast('感谢安装！');
       }
     } else {
-      // 如果没有捕获到 prompt，可能是已经安装或浏览器不支持自动触发，直接显示引导
       setShowInstallGuide(true);
     }
   };
@@ -93,12 +92,10 @@ const App: React.FC = () => {
         localStorage.clear();
         showToast('缓存清理中...');
         setTimeout(() => {
-          // Fix: window.location.reload() no longer accepts arguments in modern TypeScript/Web APIs
-          window.location.reload(); // 强制刷新页面
+          window.location.reload(); 
         }, 1000);
       });
     } else {
-      // Fix: window.location.reload() no longer accepts arguments in modern TypeScript/Web APIs
       window.location.reload();
     }
   };
