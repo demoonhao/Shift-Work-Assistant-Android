@@ -1,11 +1,13 @@
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // 如果你的仓库名不是 <username>.github.io，
-  // 比如仓库名是 shift-clock，这里需要设置为 '/shift-clock/'
+  // 使用相对路径，自动适配各种 GitHub Pages 部署路径（根域名或子目录）
   base: './', 
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  }
 })
