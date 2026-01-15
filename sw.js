@@ -1,7 +1,7 @@
-const CACHE_NAME = 'wife-shift-clock-v11';
+const CACHE_NAME = 'wife-shift-clock-v13';
 
-// 仅缓存最基础的 Shell 文件
 const PRE_CACHE = [
+  './',
   './index.html',
   './manifest.json',
   'https://cdn-icons-png.flaticon.com/512/2997/2997155.png'
@@ -25,29 +25,31 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 核心：网络优先策略。如果网络通畅，永远不从缓存拿旧文件。
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // 如果请求的是页面导航
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('./') || caches.match('./index.html');
+      })
+    );
+    return;
+  }
+
+  // 资源文件
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // 如果是有效响应且是本站资源，动态更新缓存
-        if (response && response.status === 200 && response.type === 'basic') {
+    caches.match(event.request).then((cached) => {
+      return cached || fetch(event.request).then((response) => {
+        if (response.status === 200) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
         return response;
-      })
-      .catch(() => {
-        // 只有在彻底断网（fetch 报错）时才查缓存
-        return caches.match(event.request).then((resp) => {
-          if (resp) return resp;
-          // 如果是页面跳转且没网，返回首页
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      });
+    })
   );
 });

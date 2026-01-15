@@ -5,8 +5,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#FDFDFE",
+  "theme_color": "#FDFDFE",
   "orientation": "portrait",
   "icons": [
     {
@@ -24,7 +24,7 @@
   "shortcuts": [
     {
       "name": "查看排班",
-      "url": "./index.html?tab=schedule",
+      "url": "./?tab=schedule",
       "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2997/2997155.png", "sizes": "96x96" }]
     }
   ],
