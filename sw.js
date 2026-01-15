@@ -1,12 +1,11 @@
-const CACHE_NAME = 'wife-shift-clock-v4';
+const CACHE_NAME = 'wife-shift-clock-v5';
 const ASSETS = [
   './',
   './index.html',
   './index.tsx',
   './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://img.icons8.com/fluent/512/alarm-clock.png',
-  'https://img.icons8.com/fluent/192/alarm-clock.png'
+  'https://cdn-icons-png.flaticon.com/512/3652/3652191.png'
 ];
 
 self.addEventListener('install', (event) => {

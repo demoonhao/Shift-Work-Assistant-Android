@@ -24,7 +24,9 @@ import {
   Download,
   Info,
   X,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  LogOut
 } from 'lucide-react';
 import { Shift, UserPreferences, DailyPlan, ViewType, SettingsSubView } from './types';
 import { DEFAULT_SHIFTS, DEFAULT_PREFS, INITIAL_WEEKLY_PLAN, WEEK_DAYS } from './constants';
@@ -63,6 +65,7 @@ const App: React.FC = () => {
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      console.log('Install prompt captured');
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -74,10 +77,28 @@ const App: React.FC = () => {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
-        showToast('安装指令已发出');
+        showToast('感谢安装！');
       }
     } else {
+      // 如果没有捕获到 prompt，可能是已经安装或浏览器不支持自动触发，显示引导
       setShowInstallGuide(true);
+    }
+  };
+
+  const handleForceUpdate = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+        localStorage.clear();
+        showToast('缓存已清理，正在重载...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      });
+    } else {
+      window.location.reload();
     }
   };
 
@@ -122,9 +143,9 @@ const App: React.FC = () => {
     if (time === '--:--') return;
     try {
       navigator.clipboard.writeText(time);
-      showToast(`已拷贝并开始同步日历`);
+      showToast(`已拷贝时间：${time}`);
     } catch (err) {
-      showToast('开始同步日历');
+      showToast('同步日历中...');
     }
     setTimeout(() => { downloadAlarmICS(time, currentShiftInfo.shift.name); }, 300);
   };
@@ -254,7 +275,7 @@ const App: React.FC = () => {
             
             <div className="bg-rose-50/50 p-4 rounded-[1.5rem] border border-rose-100/50 mb-10">
                 <p className="text-[10px] text-rose-900 font-bold leading-relaxed text-center italic">
-                    点击 <Share2 size={10} className="inline mb-0.5" /> 同步至系统日历，即可在日历中自动开启闹钟提醒哦！
+                    点击 <Share2 size={10} className="inline mb-0.5" /> 同步至系统日历以开启提醒
                 </p>
             </div>
           </div>
@@ -322,7 +343,7 @@ const App: React.FC = () => {
             <p className="text-gray-400 font-black text-[10px] uppercase tracking-widest mb-1">Preferences</p>
             <h1 className="text-4xl font-black text-gray-900 tracking-tighter">应用设置</h1>
           </div>
-          <div className="space-y-3.5">
+          <div className="space-y-3.5 pb-32 overflow-y-auto no-scrollbar">
             <div className="bg-white rounded-[2rem] border border-blue-100 shadow-sm overflow-hidden mb-2">
                 <button onClick={handleInstallClick} className="w-full bg-blue-600 p-5 flex items-center justify-between active:scale-[0.98] transition-all text-white">
                     <div className="flex items-center space-x-5">
@@ -336,7 +357,7 @@ const App: React.FC = () => {
                 </button>
                 <button onClick={() => setShowInstallGuide(true)} className="w-full py-3 px-5 flex items-center justify-center space-x-2 text-blue-600 text-[10px] font-black bg-blue-50/50 border-t border-blue-50">
                     <Info size={12} strokeWidth={3} />
-                    <span>小米/安卓安装遇到问题？查看指南</span>
+                    <span>安装遇到问题？查看指南</span>
                 </button>
             </div>
 
@@ -353,6 +374,13 @@ const App: React.FC = () => {
                 <ChevronRight size={20} className="text-gray-200" />
               </button>
             ))}
+
+            <div className="pt-4 border-t border-gray-100 mt-4 space-y-3">
+              <button onClick={handleForceUpdate} className="w-full bg-gray-50 text-gray-500 rounded-[1.8rem] p-5 flex items-center justify-center space-x-3 active:scale-[0.98] transition-all">
+                <RefreshCw size={18} />
+                <span className="font-black text-sm">清理缓存并同步新版</span>
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -502,28 +530,36 @@ const App: React.FC = () => {
               <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={() => setShowInstallGuide(false)}></div>
               <div className="relative bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300">
                   <div className="p-8 pb-4 flex justify-between items-center">
-                      <h3 className="text-2xl font-black text-gray-900 tracking-tighter">小米/安卓安装指南</h3>
+                      <h3 className="text-2xl font-black text-gray-900 tracking-tighter">安装到桌面</h3>
                       <button onClick={() => setShowInstallGuide(false)} className="bg-gray-100 p-2 rounded-full text-gray-400"><X size={20} /></button>
                   </div>
                   <div className="px-8 pb-10 space-y-6 overflow-y-auto max-h-[70vh] no-scrollbar">
                       <div className="bg-rose-50 p-5 rounded-[1.5rem] flex items-start space-x-4 border border-rose-100">
                           <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={20} />
-                          <p className="text-[11px] font-bold text-rose-900 leading-relaxed italic">由于小米系统限制，浏览器默认没有创建图标权限，导致安装“失败”并跳转设置页。</p>
+                          <p className="text-[11px] font-bold text-rose-900 leading-relaxed italic">如果点击“安装”没反应，可能是手机系统限制。请尝试手动添加：</p>
                       </div>
+                      
                       <div className="space-y-4">
-                          <div className="flex items-center space-x-3">
-                              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">1</div>
-                              <p className="text-sm font-black text-gray-900">打开权限</p>
-                          </div>
-                          <p className="text-[10px] text-gray-500 pl-9 leading-relaxed">在刚才跳转到的“应用信息”页面，点击 <span className="text-gray-900 font-bold underline">“权限管理”</span>，找到 <span className="text-gray-900 font-bold underline">“桌面快捷方式”</span> 并设置为 <span className="text-rose-600 font-bold">“始终允许”</span>。</p>
+                        <div className="flex items-center space-x-3">
+                            <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">安卓/小米</div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 pl-4 leading-relaxed">
+                          1. 点击浏览器右上角 <span className="text-gray-900 font-bold">“...”</span> 菜单。<br/>
+                          2. 选择 <span className="text-blue-600 font-bold">“添加到主屏幕”</span> 或 <span className="text-blue-600 font-bold">“安装应用”</span>。<br/>
+                          3. 如果还是不行，请在“应用信息”中开启“桌面快捷方式”权限。
+                        </p>
                       </div>
+
                       <div className="space-y-4">
-                          <div className="flex items-center space-x-3">
-                              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">2</div>
-                              <p className="text-sm font-black text-gray-900">手动添加</p>
-                          </div>
-                          <p className="text-[10px] text-gray-500 pl-9 leading-relaxed">如果依然无法自动创建，请点击浏览器右上角 <span className="text-gray-900 font-bold">“...”菜单</span>，选择 <span className="text-blue-600 font-bold">“添加到主屏幕”</span> 或 <span className="text-blue-600 font-bold">“安装应用”</span>。</p>
+                        <div className="flex items-center space-x-3">
+                            <div className="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-black">iOS/苹果</div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 pl-4 leading-relaxed">
+                          1. 点击底部工具栏中间的 <span className="text-gray-900 font-bold">“分享”</span> 图标 (向上箭头)。<br/>
+                          2. 向上滑动找到 <span className="text-rose-600 font-bold">“添加到主屏幕”</span>。
+                        </p>
                       </div>
+
                       <button onClick={() => setShowInstallGuide(false)} className="w-full bg-gray-900 text-white py-5 rounded-[1.5rem] font-black text-sm active:scale-95 transition-all mt-4">我知道了</button>
                   </div>
               </div>
