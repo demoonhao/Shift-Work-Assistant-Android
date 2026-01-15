@@ -2,7 +2,7 @@
   "name": "爱妻倒班闹钟",
   "short_name": "倒班闹钟",
   "description": "专为倒班职场人士设计的智能闹钟计算器",
-  "start_url": "./",
+  "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#FDFDFE",
@@ -24,7 +24,7 @@
   "shortcuts": [
     {
       "name": "查看排班",
-      "url": "./?tab=schedule",
+      "url": "index.html?tab=schedule",
       "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2997/2997155.png", "sizes": "96x96" }]
     }
   ],
