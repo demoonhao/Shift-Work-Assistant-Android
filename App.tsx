@@ -122,9 +122,9 @@ const App: React.FC = () => {
     if (time === '--:--') return;
     try {
       navigator.clipboard.writeText(time);
-      showToast(`已拷贝 ${time}`);
+      showToast(`已拷贝并开始同步日历`);
     } catch (err) {
-      showToast('拷贝失败');
+      showToast('开始同步日历');
     }
     setTimeout(() => { downloadAlarmICS(time, currentShiftInfo.shift.name); }, 300);
   };
@@ -220,7 +220,7 @@ const App: React.FC = () => {
                 </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 pb-4">
               {[
                 { label: '最早闹钟', time: timeline.earliestAlarm, icon: Bell, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', priority: true },
                 { label: '最晚起床', time: timeline.latestWakeup, icon: Moon, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
@@ -238,15 +238,24 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   {item.priority && (
-                    <button 
-                      onClick={() => handleSyncAlarm(item.time)}
-                      className="w-12 h-12 bg-rose-500 text-white rounded-[1.1rem] flex items-center justify-center shadow-lg shadow-rose-200 active:scale-90 transition-transform"
-                    >
-                      <Share2 size={20} />
-                    </button>
+                    <div className="flex flex-col items-center space-y-1">
+                        <button 
+                        onClick={() => handleSyncAlarm(item.time)}
+                        className="w-12 h-12 bg-rose-500 text-white rounded-[1.1rem] flex items-center justify-center shadow-lg shadow-rose-200 active:scale-90 transition-transform"
+                        >
+                        <Share2 size={20} />
+                        </button>
+                        <span className="text-[8px] font-black text-rose-400">同步闹钟</span>
+                    </div>
                   )}
                 </div>
               ))}
+            </div>
+            
+            <div className="bg-rose-50/50 p-4 rounded-[1.5rem] border border-rose-100/50 mb-10">
+                <p className="text-[10px] text-rose-900 font-bold leading-relaxed text-center italic">
+                    点击 <Share2 size={10} className="inline mb-0.5" /> 同步至系统日历，即可在日历中自动开启闹钟提醒哦！
+                </p>
             </div>
           </div>
         )}

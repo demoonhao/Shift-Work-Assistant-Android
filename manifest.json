@@ -4,27 +4,32 @@
   "description": "专为倒班职场人士设计的智能闹钟计算器",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#FDFDFE",
+  "background_color": "#ffffff",
   "theme_color": "#f43f5e",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/10435/10435105.png",
+      "src": "https://img.icons8.com/fluent/512/alarm-clock.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/fluent/192/alarm-clock.png",
+      "sizes": "192x192",
+      "type": "image/png"
     }
   ],
   "shortcuts": [
     {
       "name": "查看排班",
       "url": "index.html?tab=schedule",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/10435/10435105.png", "sizes": "192x192" }]
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/calendar.png", "sizes": "96x96" }]
     },
     {
       "name": "设置选项",
       "url": "index.html?tab=settings",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/10435/10435105.png", "sizes": "192x192" }]
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/settings.png", "sizes": "96x96" }]
     }
   ],
   "categories": ["lifestyle", "utilities"]
